@@ -1,0 +1,29 @@
+# Ignore virtual environment directories
+venv/
+env/
+.virtualenv/
+
+# Byte-compiled files
+*.pyc
+*.pyo
+__pycache__/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE specific files
+.idea/
+.vscode/
+
+# Node modules (if applicable)
+node_modules/
+
+# Environment files
+.env
