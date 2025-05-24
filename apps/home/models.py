@@ -33,4 +33,16 @@ class Departmants(models.Model):
         return self.departmentName
 
 
+class Designations(models.Model):
+    designationId = models.IntegerField(primary_key=True)
+    designationName = models.CharField(max_length=100, unique=True, null=False, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        db_table = 'designations'
+        verbose_name = 'Designation'
+        verbose_name_plural = 'Designations'
+
+    def __str__(self):
+        return self.designationName
