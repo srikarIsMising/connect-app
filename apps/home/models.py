@@ -18,31 +18,31 @@ class FacultyUsers(AbstractBaseUser):
         verbose_name = 'Faculty User'
         verbose_name_plural = 'Faculty Users'
 
-class Departmants(models.Model):
+class FacultyDepartmants(models.Model):
     departmentId = models.IntegerField(primary_key=True)
     departmentName = models.CharField(max_length=100, unique=True, null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'departments'
-        verbose_name = 'Department'
-        verbose_name_plural = 'Departments'
+        db_table = 'faculty_departments'
+        verbose_name = 'Faculty Department'
+        verbose_name_plural = 'Faculty Departments'
 
     def __str__(self):
         return self.departmentName
 
 
-class Designations(models.Model):
+class FacultyDesignations(models.Model):
     designationId = models.IntegerField(primary_key=True)
     designationName = models.CharField(max_length=100, unique=True, null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'designations'
-        verbose_name = 'Designation'
-        verbose_name_plural = 'Designations'
+        db_table = 'faculty_designations'
+        verbose_name = 'Faculty Designation'
+        verbose_name_plural = 'Faculty Designations'
 
     def __str__(self):
         return self.designationName
