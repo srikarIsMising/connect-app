@@ -2,51 +2,50 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
 
 # Create your models here.
-class FacultyUserManager(BaseUserManager):
-    def create_user(self, email, fullName, phoneNumber, username, password=None):
+class FacultyUSerManager(BaseUserManager):
+    def create_user(self, facultyId, fullName, email, phoneNumber, password, **extra_fields):
+        if not facultyId:
+            raise ValueError('Faculty ID is required')
         if not email:
-            raise ValueError('Users must have an email address')
-        if not fullName:
-            raise ValueError('Users must have a full name')
+            raise ValueError('Email is required')
         if not phoneNumber:
-            raise ValueError('Users must have a phone number')
-        if not username:
-            raise ValueError('Users must have a username')
+            raise ValueError('Phone number is required')
+        if not password:
+            raise ValueError('Password is required')
 
         user = self.model(
-            email=self.normalize_email(email),
+            facultyId=facultyId,
             fullName=fullName,
-            phoneNumber=phoneNumber,
-            username=username
+            email=self.normalize_email(email),
+            phoneNumber=phoneNumber
         )
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, fullName, phoneNumber, username, password):
-        user = self.create_user(email, fullName, phoneNumber, username, password)
+    def create_superuser(self, facultyId, fullName, email, phoneNumber, password):
+        user = self.create_user(facultyId, fullName, email, phoneNumber, password)
         user.is_active = True
         user.save(using=self._db)
         return user
-
 
 class FacultyUsers(AbstractBaseUser):
     userId = models.IntegerField(primary_key=True)
     fullName = models.CharField(max_length=100, null=False, blank=False)
     email = models.EmailField(max_length=100, unique=True, null=False, blank=False)
     phoneNumber = models.CharField(max_length=15, unique=True, null=False, blank=False)
-    username = models.CharField(max_length=50, unique=True, null=False, blank=False)
+    facultyId = models.CharField(max_length=20, unique=True, null=False, blank=False)
     password = models.CharField(max_length=128, null=False, blank=False)
     otp = models.CharField(max_length=6, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    objects = FacultyUserManager()
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['fullName', 'phoneNumber', 'username']
+    objects = FacultyUSerManager()
+    USERNAME_FIELD = 'facultyId'
+    REQUIRED_FIELDS = ['fullName', 'email', 'phoneNumber', 'password']
     def __str__(self):
-        return self.fullName
+        return f"{self.fullName} ({self.facultyId})"
 
     class Meta:
         db_table = 'faculty_users'
@@ -81,5 +80,18 @@ class FacultyDesignations(models.Model):
 
     def __str__(self):
         return self.designationName
+
+
+class FacultyGroups(models.Model):
+    userId = models.ForeignKey(FacultyUsers, on_delete=models.CASCADE, related_name='faculty_groups')
+    departmentId = models.ForeignKey(FacultyDepartments, on_delete=models.CASCADE, related_name='faculty_groups')
+    designationId = models.ForeignKey(FacultyDesignations, on_delete=models.CASCADE, related_name='faculty_groups')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'faculty_groups'
+        verbose_name = 'Faculty Group'
+        verbose_name_plural = 'Faculty Groups'
 
 
