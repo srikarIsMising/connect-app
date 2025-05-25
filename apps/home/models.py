@@ -40,7 +40,7 @@ class FacultyUsers(AbstractBaseUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    objects = FacultyUSerManager()
+    objects = FacultyUserManager()
     USERNAME_FIELD = 'facultyId'
     REQUIRED_FIELDS = ['fullName', 'email', 'phoneNumber', 'password']
     def __str__(self):
