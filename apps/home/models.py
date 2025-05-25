@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
 
 # Create your models here.
-class FacultyUSerManager(BaseUserManager):
+class FacultyUserManager(BaseUserManager):
     def create_user(self, facultyId, fullName, email, phoneNumber, password, **extra_fields):
         if not facultyId:
             raise ValueError('Faculty ID is required')
@@ -34,8 +34,7 @@ class FacultyUsers(AbstractBaseUser):
     fullName = models.CharField(max_length=100, null=False, blank=False)
     email = models.EmailField(max_length=100, unique=True, null=False, blank=False)
     phoneNumber = models.CharField(max_length=15, unique=True, null=False, blank=False)
-    facultyId = models.CharField(max_length=20, unique=True, null=False, blank=False)
-    password = models.CharField(max_length=128, null=False, blank=False)
+    facultyId = models.CharField(max_length=20, unique=True, null=False, blank=False, default="1234567890")
     otp = models.CharField(max_length=6, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -83,7 +82,7 @@ class FacultyDesignations(models.Model):
 
 
 class FacultyGroups(models.Model):
-    userId = models.ForeignKey(FacultyUsers, on_delete=models.CASCADE, related_name='faculty_groups')
+    userId = models.OneToOneField(FacultyUsers, on_delete=models.CASCADE, related_name='faculty_groups')
     departmentId = models.ForeignKey(FacultyDepartments, on_delete=models.CASCADE, related_name='faculty_groups')
     designationId = models.ForeignKey(FacultyDesignations, on_delete=models.CASCADE, related_name='faculty_groups')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -94,4 +93,36 @@ class FacultyGroups(models.Model):
         verbose_name = 'Faculty Group'
         verbose_name_plural = 'Faculty Groups'
 
+class StudentsUsers(AbstractBaseUser):
+    userId = models.IntegerField(primary_key=True)
+    fullName = models.CharField(max_length=100, null=False, blank=False)
+    email = models.EmailField(max_length=100, unique=True, null=False, blank=False)
+    phoneNumber = models.CharField(max_length=15, unique=True, null=False, blank=False)
+    studentId = models.CharField(max_length=20, unique=True, null=False, blank=False, default="1234567890")
+    otp = models.CharField(max_length=6, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'students_users'
+        verbose_name = 'Student User'
+        verbose_name_plural = 'Student Users'
+
+    def __str__(self):
+        return f"{self.fullName} ({self.studentId})"
+
+class StudentsBranch(models.Model):
+    branchId = models.IntegerField(primary_key=True)
+    branchName = models.CharField(max_length=100, unique=True, null=False, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'students_branch'
+        verbose_name = 'Student Branch'
+        verbose_name_plural = 'Student Branches'
+    
+    def __str__(self):
+        return self.branchName
 

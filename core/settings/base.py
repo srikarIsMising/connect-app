@@ -82,7 +82,7 @@ DATABASES = {
         'NAME': config('DB_NAME',),
         'USER': config('DB_USER',),
         'PASSWORD': config('DB_PASSWORD',),
-        'HOST': 'localhost',  # Set to 'db' if using Docker
+        'HOST': config('DB_HOST'),  # Set to 'db' if using Docker
         'PORT': '5432',  # Default PostgreSQL port
     }
 }
