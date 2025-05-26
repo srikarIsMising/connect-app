@@ -1,0 +1,17 @@
+{% extends "./auth_base.html" %}
+{% block title %}Login{% endblock title %}
+{% block content %}
+
+<form method="post">
+  {% csrf_token %}
+  <div class="mb-3 mx-40">
+    <label for="userIdInput" class="form-label text-light">ID</label>
+    <input type="text" class="form-control" id="userIdInput" aria-describedby="">
+  </div>
+  <div class="mb-3">
+    <label for="userPasswordInput" class="form-label text-light">Password</label>
+    <input type="password" class="form-control" id="userPasswordInput">
+  </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{% endblock content %}

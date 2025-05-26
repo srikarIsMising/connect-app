@@ -12,11 +12,18 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).parent.parent.parent
+# ...existing code...
+# This CORE_DIR points to /backend/backend/core, but we need to reference /backend/backend
+CORE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Change this to point to the correct location
+TEMPLATE_DIR = os.path.join(BASE_DIR, 'apps/templates')
+# ...existing code...
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -35,6 +42,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'apps.home',
     'apps.api',
+    'apps.authentication',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -55,16 +63,19 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'core.urls'
 
+#TEMPLATE_DIR = os.path.join(CORE_DIR, 'apps/templates')
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATE_DIR],  # Adjusted to point to the apps/templates directory],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.debug',
             ],
         },
     },
