@@ -1,16 +1,55 @@
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 
 # Create your models here.
+class UserManager(BaseUserManager):
+    def _create_user(self, institutionId, fullName, email, password=None, **extra_fields):
+        if not institutionId:
+            raise ValueError('The Institution ID must be set')
+        if not fullName:
+            raise ValueError('The Full Name must be set')
+        if not email:
+            raise ValueError('The Email must be set')
+
+        user = self.model(
+            institutionId=institutionId,
+            fullName=fullName,
+            email=self.normalize_email(email),
+            **extra_fields
+        )
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_user_faculty(self, institutionId, fullName, email, password=None, **extra_fields):
+        extra_fields.setdefault('userType', 'faculty')
+        return self._create_user(institutionId, fullName, email, password, **extra_fields)
+
+    def create_user_student(self, institutionId, fullName, email, password=None, **extra_fields):
+        extra_fields.setdefault('userType', 'student')
+        return self._create_user(institutionId, fullName, email, password, **extra_fields)
+
+    def create_superuser(self, institutionId, fullName, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('userType', 'admin')
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self._create_user(institutionId, fullName, email, password, **extra_fields)
+
 class Users(AbstractBaseUser):
     USER_TYPRE_CHOICES = [
         ('student', 'Student'),
         ('faculty', 'Faculty'),
         ('admin', 'Admin'),
     ]
-    userId = models.IntegerField(primary_key=True)
+    userId = models.BigAutoField(primary_key=True)
     fullName = models.CharField(max_length=100, null=False, blank=False)
-    email = models.EmailField(max_length=100, unique=True, null=False, blank=False)
+    email = models.EmailField(max_length=100, null=False, blank=False)
     password = models.CharField(max_length=128, null=False, blank=False)
     phoneNumber = models.CharField(max_length=15, unique=True, null=False, blank=False)
     userType = models.CharField(max_length=20, choices=USER_TYPRE_CHOICES, default='faculty')
@@ -18,6 +57,13 @@ class Users(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    last_login = models.DateTimeField(null=True, blank=True)
+
+    objects = UserManager()
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['institutionId', 'fullName']
+    def __str__(self):
+        return f"{self.fullName} ({self.email})"
 
     class Meta:
         db_table = 'users'
@@ -66,6 +112,20 @@ class FacultyProfile(models.Model):
         verbose_name = 'Faculty Group'
         verbose_name_plural = 'Faculty Groups'
 
+class StudentsStreams(models.Model):
+    streamId = models.IntegerField(primary_key=True)
+    streamName = models.CharField(max_length=100, unique=True, null=False, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'students_streams'
+        verbose_name = 'Student Stream'
+        verbose_name_plural = 'Student Streams'
+
+    def __str__(self):
+        return self.streamName
+
 class StudentsCourse(models.Model):
     courseId = models.IntegerField(primary_key=True)
     courseName = models.CharField(max_length=100, unique=True, null=False, blank=False)
@@ -80,7 +140,7 @@ class StudentsCourse(models.Model):
     def __str__(self):
         return self.courseName
     
-class CourseDivisions(models.Model):
+class StudentsCourseDivisions(models.Model):
     divisionId = models.IntegerField(primary_key=True)
     divisionName = models.CharField(max_length=100, unique=True, null=False, blank=False)
     courseId = models.ForeignKey(StudentsCourse, on_delete=models.CASCADE, related_name='course_divisions')
