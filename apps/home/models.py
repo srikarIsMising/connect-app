@@ -41,8 +41,8 @@ class UserManager(BaseUserManager):
 
         return self._create_user(institutionId, fullName, email, password, **extra_fields)
 
-class Users(AbstractBaseUser):
-    USER_TYPRE_CHOICES = [
+class Users(AbstractBaseUser, PermissionsMixin):
+    USER_TYPE_CHOICES = [
         ('student', 'Student'),
         ('faculty', 'Faculty'),
         ('admin', 'Admin'),
@@ -50,18 +50,19 @@ class Users(AbstractBaseUser):
     userId = models.BigAutoField(primary_key=True)
     fullName = models.CharField(max_length=100, null=False, blank=False)
     email = models.EmailField(max_length=100, null=False, blank=False)
-    password = models.CharField(max_length=128, null=False, blank=False)
     phoneNumber = models.CharField(max_length=15, unique=True, null=False, blank=False)
-    userType = models.CharField(max_length=20, choices=USER_TYPRE_CHOICES, default='faculty')
+    userType = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='faculty')
     institutionId = models.CharField(max_length=20, unique=True, null=False, blank=False, default="1234567890")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_login = models.DateTimeField(null=True, blank=True)
+    is_superuser = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
 
     objects = UserManager()
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['institutionId', 'fullName']
+    USERNAME_FIELD = 'institutionId'
+    REQUIRED_FIELDS = ['email', 'fullName']
     def __str__(self):
         return f"{self.fullName} ({self.email})"
 

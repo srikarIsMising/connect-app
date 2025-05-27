@@ -82,7 +82,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
-
+AUTH_USER_MODEL = 'home.Users'
+LOGIN_URL= 'auth/login'  # Adjusted to use the namespace for the login URL
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases

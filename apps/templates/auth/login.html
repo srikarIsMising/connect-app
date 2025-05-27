@@ -2,16 +2,45 @@
 {% block title %}Login{% endblock title %}
 {% block content %}
 
-<form method="post">
-  {% csrf_token %}
-  <div class="mb-3 mx-40">
-    <label for="userIdInput" class="form-label text-light">ID</label>
-    <input type="text" class="form-control" id="userIdInput" aria-describedby="">
+<div class="container">
+  <div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+      <div class="card shadow bg-dark text-light">
+        <div class="card-header bg-primary text-white text-center">
+          <h4>Login to ConnectUp</h4>
+        </div>
+        <div class="card-body p-4">
+          <form method="post">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+          <label for="institutionId" class="form-label">Institution ID</label>
+          <div class="input-group">
+            <span class="input-group-text bg-dark text-light border-secondary"><i class="fa-solid fa-id-card"></i></span>
+            <input type="text" class="form-control bg-dark text-light border-secondary" name="institutionId" id="institutionId" placeholder="Enter your ID" required>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          <div class="input-group">
+            <span class="input-group-text bg-dark text-light border-secondary"><i class="fa-solid fa-key"></i></span>
+            <input type="password" class="form-control bg-dark text-light border-secondary" id="password" name="password" placeholder="Enter your password" required>
+          </div>
+        </div>
+        
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-primary btn-lg">Sign In</button>
+        </div>
+        
+        <div class="text-center mt-3">
+          <a href="#" class="text-decoration-none text-info">Forgot password?</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="mb-3">
-    <label for="userPasswordInput" class="form-label text-light">Password</label>
-    <input type="password" class="form-control" id="userPasswordInput">
-  </div>
-  <button type="submit" class="btn btn-primary">Submit</button>
-</form>
+</div>
+
 {% endblock content %}
