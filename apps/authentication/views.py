@@ -19,7 +19,15 @@ def login_view(request):
         if user is not None:
             # If the user is authenticated, log them in
             login(request, user)
-            return redirect('../../')  # Redirect to a success page, e.g., the homepage
+            if user.userType == 'faculty':
+                # Redirect to the faculty homepage or any other page
+                return redirect('../../faculty/')
+            elif user.userType == 'student':
+                # Redirect to the student homepage or any other page
+                return redirect('../../student/')
+            elif user.userType == 'admin':
+                # Redirect to the admin homepage or any other page
+                return redirect('../../admin/')
         else:
             print('unable to authenticate user')
             # If authentication fails, you can render an error message
