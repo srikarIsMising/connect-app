@@ -1,0 +1,19 @@
+{% extends "../base.html" %}
+{% block nav_items %}
+<li class="nav-item">
+    <a class="nav-link active" aria-current="page" href="/admin">Home</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link active" aria-current="page" href="/admin/user_management">Users</a>
+</li>
+ <li class="nav-item dropdown">
+          <a class="nav-link active dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Faculty
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Faculty Profiling</a></li>
+            <li><a class="dropdown-item" href="#">Add Faculty Departments</a></li>
+            <li><a class="dropdown-item" href="{% url 'faculty_designations_management' %}">Add Faculty Designations</a></li>
+          </ul>
+        </li>
+{% endblock nav_items %}

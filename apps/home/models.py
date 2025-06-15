@@ -40,6 +40,14 @@ class UserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
 
         return self._create_user(institutionId, fullName, email, password, **extra_fields)
+    
+    def delete_user(self, institutionId):
+        try:
+            user = self.get(institutionId=institutionId)
+            user.delete()
+            return True
+        except Users.DoesNotExist:
+            return False
 
 class Users(AbstractBaseUser, PermissionsMixin):
     USER_TYPE_CHOICES = [
@@ -50,7 +58,7 @@ class Users(AbstractBaseUser, PermissionsMixin):
     userId = models.BigAutoField(primary_key=True)
     fullName = models.CharField(max_length=100, null=False, blank=False)
     email = models.EmailField(max_length=100, null=False, blank=False)
-    phoneNumber = models.CharField(max_length=15, unique=True, null=False, blank=False)
+    phoneNumber = models.CharField(max_length=15, null=False, blank=False)
     userType = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='faculty')
     institutionId = models.CharField(max_length=20, unique=True, null=False, blank=False, default="1234567890")
     is_active = models.BooleanField(default=True)
@@ -87,8 +95,9 @@ class FacultyDepartments(models.Model):
 
 
 class FacultyDesignations(models.Model):
-    designationId = models.IntegerField(primary_key=True)
+    designationId = models.AutoField(primary_key=True)
     designationName = models.CharField(max_length=100, unique=True, null=False, blank=False)
+    level = models.IntegerField(default=None, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

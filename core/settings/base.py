@@ -23,6 +23,7 @@ CORE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Change this to point to the correct location
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'apps/templates')
+
 # ...existing code...
 
 # Quick-start development settings - unsuitable for production
