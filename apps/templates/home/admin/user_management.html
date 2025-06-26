@@ -1,8 +1,7 @@
 {% extends "./a_base.html" %}
+{% load static %}
 {% block title %}Users Administration{% endblock title %}
 {% block content %}
-
-
 <div class="modal" id="delModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -21,8 +20,9 @@
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         <form method="POST">
             {% csrf_token %}
+            <input type="hidden" name="deleteUser" id="deleteUser"/>
             <input type="hidden" name="institutionId" id="institution_id_modal_inp">
-            <input type="hidden" name="deleteUser" id="email_modal" value="true">
+            <input type="hidden" name="userId" id="user_id_modal_inp">
             <button type="submit" class="btn btn-danger">Delete</button>
         </form>
       </div>
@@ -30,6 +30,82 @@
   </div>
 </div>
 
+<div class="modal" id="editModal" tabindex="-1">
+    <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <h1 class="h3" >Existing User Details</h1>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>User ID:</strong>
+                            <span id="edit_user_id_span"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Institution ID:</strong>
+                            <span id="edit_institution_id_span"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Full Name:</strong>
+                            <span id="edit_full_name_span"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Email:</strong>
+                            <span id="edit_email_span"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Phone Number:</strong>
+                            <span id="edit_phone_number_span"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>User Type:</strong>
+                            <span id="edit_user_type_span"></span>
+                        </div>
+                    </div>
+                </div>
+                <form action="POST" class="editUserForm">
+                    {% csrf_token %}
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Edit Institution ID</span>
+                        <div class="form-floating">
+                            <input name="institutionId" type="text" class="form-control" id="edit_institution_id" placeholder="Institution ID" />
+                            <label for="edit_institution_id">Institution ID</label>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Edit Full Name</span>
+                        <div class="form-floating">
+                            <input name="fullName" type="text" class="form-control" id="edit_full_name" placeholder="Full Name" />
+                            <label for="edit_full_name">Full Name</label>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Edit phone Number</span>
+                        <div class="form-floating">
+                            <input name="phoneNumber" type="number" class="form-control" id="edit_phone_number" placeholder="Phone Number" />
+                            <label for="edit_phone_number">Phone Number</label>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Edit Email</span>
+                        <div class="form-floating">
+                            <input name="email" type="text" class="form-control" id="edit_email" placeholder="Email" />
+                            <label for="edit_email">Email</label>
+                        </div>
+                    </div>
+                    <Button type="submit" class="btn btn-primary">Save Changes</Button>
+                    <Button type="button" class="btn btn-secondary" data-bs-dismiss="modal"> Cancel</Button>
+                    <input type="hidden" name="editUser" id="editUser"/>
+                    <input type="hidden" name="userId" id="edit_user_id">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="container-fluid px-4 py-5 bg-dark text-light">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -179,10 +255,10 @@
                             <td>
                                 <div class="btn-group" role="group">
                                     
-                                    <button type="button" class="btn btn-sm btn-outline-warning">
+                                    <button onClick="prepareEdit('{{ user.fullName }}', '{{ user.institutionId }}', '{{ user.email }}', '{{ user.userType }}', '{{user.userId}}', '{{user.phoneNumber}}')" data-bs-toggle="modal" data-bs-target="#editModal" class="btn btn-sm btn-outline-warning">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    <button onClick="prepareDelete('{{ user.fullName }}', '{{ user.institutionId }}', '{{ user.email }}', '{{ user.userType }}')" type="button" data-bs-toggle="modal" data-bs-target="#delModal" class="btn btn-sm btn-outline-danger">
+                                    <button onClick="prepareDelete('{{ user.fullName }}', '{{ user.institutionId }}', '{{ user.email }}', '{{ user.userType }}', '{{user.userId}}')" type="button" data-bs-toggle="modal" data-bs-target="#delModal" class="btn btn-sm btn-outline-danger">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -196,61 +272,10 @@
                     </tbody>
                 </table>
             </div>
-            
-            <!-- Pagination -->
-            {% if page_obj.has_other_pages %}
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
-                    {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link bg-dark text-light border-secondary" href="?page=1" aria-label="First">
-                            <span aria-hidden="true">&laquo;&laquo;</span>
-                        </a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link bg-dark text-light border-secondary" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-                    {% endif %}
-                    
-                    {% for num in page_obj.paginator.page_range %}
-                        {% if num == page_obj.number %}
-                        <li class="page-item active"><span class="page-link bg-primary border-primary">{{ num }}</span></li>
-                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                        <li class="page-item">
-                            <a class="page-link bg-dark text-light border-secondary" href="?page={{ num }}">{{ num }}</a>
-                        </li>
-                        {% endif %}
-                    {% endfor %}
-                    
-                    {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link bg-dark text-light border-secondary" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link bg-dark text-light border-secondary" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
-                            <span aria-hidden="true">&raquo;&raquo;</span>
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
-            {% endif %}
         </div>
     </div>
 </div>
 
 
-<script>
-    prepareDelete = (fullName, institutionId, email, userType) => {
-        document.getElementById('full_name_modal').textContent = fullName;
-        document.getElementById('institution_id_modal').textContent = institutionId;
-        document.getElementById('email_modal').textContent = email;
-        document.getElementById('user_type_modal').textContent = userType.charAt(0).toUpperCase() + userType.slice(1);
-        document.getElementById('institution_id_modal_inp').value = institutionId;
-    };
-</script>
+<script src="{% static 'js/user_management.js' %}?v={% now 'U' %}"></script>
 {% endblock content %}

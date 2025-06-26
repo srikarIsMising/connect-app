@@ -13,8 +13,8 @@
                     <form method="post" action="{% url 'faculty_designations_management' %}">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <label for="designation" class="form-label">Designation Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="designation" name="designation" required>
+                            <label for="designationName" class="form-label">Designation Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="designationName" name="designationName" required>
                         </div>
                         <div class="mb-3">
                             <label for="level" class="form-label">Designation Level <span class="text-danger">*</span></label>
@@ -44,6 +44,7 @@
                             </tr>
                             {% endfor %}
                         </tbody>
+                    </table>
                 </div>
             </div>
         </div>

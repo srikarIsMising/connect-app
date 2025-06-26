@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from re import S
 from decouple import config
 import os
 
@@ -23,6 +24,7 @@ CORE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Change this to point to the correct location
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'apps/templates')
+STATIC_DIR = os.path.join(BASE_DIR, 'apps', 'static')
 
 # ...existing code...
 
@@ -35,7 +37,15 @@ SECRET_KEY = 'django-insecure-v2ftemh6eyf*!e1mdy239-df)btfxnh@fk=v8i(_int^xy1=m7
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+if DEBUG:
+    # Use in-memory session storage for development
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'default'
+
+ALLOWED_HOSTS = [
+    '192.168.1.3',
+    '127.0.0.1'
+]
 
 
 # Application definition
@@ -131,6 +141,11 @@ USE_I18N = True
 
 USE_TZ = True
 
+STATICFILES_DIRS = [
+    STATIC_DIR,  # Adjusted to point to the apps/static directory
+]
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Directory where static files will be collected
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/

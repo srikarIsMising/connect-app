@@ -6,6 +6,7 @@ from .decorators import *
 from apps.home.models import *
 from django.contrib import messages
 from datetime import datetime
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 # Create your views here.
 def redirector(request):
@@ -60,26 +61,26 @@ def user_management(request):
                 users = users.all()
             else  : users = users.filter(userType=searct_type)
 
-    if request.method == 'POST' and 'deleteUser' in request.POST:
-        # Handle user deletion
+    if request.method == 'POST' and request.POST.get('deleteUser'):
         institutionId = request.POST.get('institutionId')
-        # print(f"Attempting to delete user with ID: {institutionId}")
-        if request.user.institutionId == institutionId:
-            messages.warning(request, "You cannot delete your own account while logged in.")
+        userId = request.POST.get('userId')
+        if institutionId and userId:
+            if Users.objects.filter(userId = userId).exists() and Users.objects.filter(userId = userId).first().institutionId == institutionId:
+                if request.user.institutionId == institutionId:
+                    messages.error(request, "You cannot delete your own account.")
+                    return redirect('user_management')
+                else:
+                    user_to_delete = Users.objects.get(userId=userId)
+                    user_to_delete.delete()
+                    messages.success(request, f"User with ID {institutionId} has been deleted successfully.")
+                    return redirect('user_management')
+            else:
+                messages.error(request, f"User with ID {institutionId} does not exist or does not match the provided user ID.")
+                return redirect('user_management')
+        else:
+            messages.error(request, "Institution ID and User ID are required to delete a user.")
             return redirect('user_management')
-        if not institutionId:
-            
-            return redirect('user_management')
-        # print(f"Deleting user with ID: {institutionId}")
-        try:
-            user = Users.objects.get(institutionId=institutionId)
-            user.delete()
-            #print(f"User with ID {institutionId} has been deleted successfully.")
-        except Users.DoesNotExist:
-            #print(f"User with ID {institutionId} does not exist.")
-            return HttpResponse("User not found", status=404)
-        return redirect('user_management')
-
+        
     return render(request, 'home/admin/user_management.html', {'page_obj': users, 'total_users': total_users, 'faculty_count': faculty_count, 'student_count': student_count, 'admin_count': admin_count})
 
 @user_is_admin
@@ -95,21 +96,17 @@ def add_user(request):
 
         if not all([institution_id, full_name, email, password, user_type]):
             messages.error(request, "All required fields must be filled")
-            return render(request, 'home/admin/user_add.html')
+            return render(request, 'home/admin/add_user.html')
             
         if password != confirm_password:
             messages.error(request, "Passwords do not match")
-            return render(request, 'home/admin/user_add.html')
-            
+            return render(request, 'home/admin/add_user.html')
+
         # Check if user already exists
         if Users.objects.filter(institutionId=institution_id).exists():
             messages.error(request, f"User with ID {institution_id} already exists")
-            return render(request, 'home/admin/user_add.html')
-            
-        if Users.objects.filter(email=email).exists():
-            messages.error(request, f"User with email {email} already exists")
-            return render(request, 'home/admin/user_add.html')
-        
+            return render(request, 'home/admin/add_user.html')
+
         if user_type == 'admin':
             user = Users.objects.create_superuser(
                 institutionId=institution_id,
@@ -152,17 +149,17 @@ def faculty_designations_management(request):
     designations = FacultyDesignations.objects.all()
     print(designations)
     if (request.method == "POST"):
-        designation = request.POST.get('designation')
+        designationName = request.POST.get('designationName')
         designationLevel = request.POST.get('level')
-        if designation and designationLevel:
+        if designationName and designationLevel:
             # Check if the designation already exists
-            if FacultyDesignations.objects.filter(designationName=designation).exists():
-                # messages.error(request, f"Designation '{designation}' with level '{designationLevel}' already exists.")
+            if FacultyDesignations.objects.filter(designationName=designationName).exists():
+                messages.error(request, f"Designation '{designationName}' with level '{designationLevel}' already exists.")
                 return redirect('faculty_designations_management')
             # Create a new designation
-            print(f"Adding designation: {designation} with level: {designationLevel}")
-            FacultyDesignations.objects.create(designationName=designation, level=designationLevel, created_at=datetime.now(), updated_at=datetime.now())
-            # messages.success(request, f"Designation '{designation}' with level '{designationLevel}' added successfully.")
+            print(f"Adding designation: {designationName} with level: {designationLevel}")
+            FacultyDesignations.objects.create(designationName=designationName, level=designationLevel, created_at=datetime.now(), updated_at=datetime.now())
+            # messages.success(request, f"Designation '{designationName}' with level '{designationLevel}' added successfully.")
         else:
             return redirect('/')
     # Placeholder for faculty designations management logic
