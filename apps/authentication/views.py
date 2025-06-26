@@ -1,3 +1,4 @@
+from django.contrib import messages
 from traceback import print_tb
 
 from django.shortcuts import redirect, render
@@ -29,7 +30,7 @@ def login_view(request):
                 # Redirect to the admin homepage or any other page
                 return redirect('../../admin/')
         else:
-            print('unable to authenticate user')
+            messages.error(request, 'Invalid credentials. Please try again.')
             # If authentication fails, you can render an error message
             return render(request, 'auth/login.html', {'error': 'Invalid credentials'})
 
