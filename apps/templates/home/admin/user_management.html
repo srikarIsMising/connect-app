@@ -67,7 +67,7 @@
                         </div>
                     </div>
                 </div>
-                <form action="POST" class="editUserForm">
+                <form method="POST">
                     {% csrf_token %}
                     <div class="input-group mb-3">
                         <span class="input-group-text">Edit Institution ID</span>
@@ -97,15 +97,17 @@
                             <label for="edit_email">Email</label>
                         </div>
                     </div>
-                    <Button type="submit" class="btn btn-primary">Save Changes</Button>
-                    <Button type="button" class="btn btn-secondary" data-bs-dismiss="modal"> Cancel</Button>
                     <input type="hidden" name="editUser" id="editUser"/>
                     <input type="hidden" name="userId" id="edit_user_id">
+                    <Button type="submit" class="btn btn-primary">Save Changes</Button>
+                    <Button type="button" class="btn btn-secondary" data-bs-dismiss="modal"> Cancel</Button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+
 
 <div class="container-fluid px-4 py-5 bg-dark text-light">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -226,6 +228,7 @@
                             <th>Phone</th>
                             <th>Type</th>
                             <th>Status</th>
+                            <th>Gender</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -253,6 +256,13 @@
                                 {% endif %}
                             </td>
                             <td>
+                                {% if user.gender == 'male' or user.gender == 'Male' %}
+                                    <span class="badge bg-cyan">Male</span>
+                                {% else %}
+                                    <span class="badge bg-pink">Female</span>
+                                {% endif %}
+                            </td>
+                            <td>
                                 <div class="btn-group" role="group">
                                     
                                     <button onClick="prepareEdit('{{ user.fullName }}', '{{ user.institutionId }}', '{{ user.email }}', '{{ user.userType }}', '{{user.userId}}', '{{user.phoneNumber}}')" data-bs-toggle="modal" data-bs-target="#editModal" class="btn btn-sm btn-outline-warning">
@@ -276,6 +286,52 @@
     </div>
 </div>
 
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link bg-dark text-light border-secondary" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.userType %}&userType={{ request.GET.userType }}{% endif %}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <a class="page-link bg-dark text-muted border-secondary" href="#" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        {% endif %}
+        
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <a class="page-link bg-primary text-light border-primary" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.userType %}&userType={{ request.GET.userType }}{% endif %}">{{ num }}</a>
+                </li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link bg-dark text-light border-secondary" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.userType %}&userType={{ request.GET.userType }}{% endif %}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link bg-dark text-light border-secondary" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.userType %}&userType={{ request.GET.userType }}{% endif %}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <a class="page-link bg-dark text-muted border-secondary" href="#" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
 
 <script src="{% static 'js/user_management.js' %}?v={% now 'U' %}"></script>
 {% endblock content %}

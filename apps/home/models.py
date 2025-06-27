@@ -41,13 +41,23 @@ class UserManager(BaseUserManager):
 
         return self._create_user(institutionId, fullName, email, password, **extra_fields)
     
-    def delete_user(self, institutionId):
+    def delete_user(self, userId):
         try:
-            user = self.get(institutionId=institutionId)
+            user = self.get(userId=userId)
             user.delete()
             return True
         except Users.DoesNotExist:
             return False
+        
+    def update_user(self, userId, **kwargs):
+        try:
+            user = self.get(userId=userId)
+            for attr, value in kwargs.items():
+                setattr(user, attr, value)
+            user.save()
+            return user
+        except Users.DoesNotExist:
+            return None
 
 class Users(AbstractBaseUser, PermissionsMixin):
     USER_TYPE_CHOICES = [
@@ -55,12 +65,18 @@ class Users(AbstractBaseUser, PermissionsMixin):
         ('faculty', 'Faculty'),
         ('admin', 'Admin'),
     ]
-    userId = models.BigAutoField(primary_key=True)
+    GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('other', 'Other')
+    ]
+    userId = models.BigAutoField(primary_key=True, null=False, blank=False)
     fullName = models.CharField(max_length=100, null=False, blank=False)
     email = models.EmailField(max_length=100, null=False, blank=False)
     phoneNumber = models.CharField(max_length=15, null=False, blank=False)
     userType = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='faculty')
     institutionId = models.CharField(max_length=20, unique=True, null=False, blank=False, default="1234567890")
+    gender = models.CharField(max_length=10, null=True, blank=True, choices=GENDER_CHOICES, default='other')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

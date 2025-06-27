@@ -61,6 +61,15 @@ def user_management(request):
                 users = users.all()
             else  : users = users.filter(userType=searct_type)
 
+    page = request.GET.get('page', 1)
+    paginator = Paginator(users, 10)  # Show 10 users per page
+    try:
+        users = paginator.page(page)
+    except PageNotAnInteger:
+        users = paginator.page(1)
+    except EmptyPage:
+        users = paginator.page(paginator.num_pages)
+
     if request.method == 'POST' and request.POST.get('deleteUser'):
         institutionId = request.POST.get('institutionId')
         userId = request.POST.get('userId')
@@ -70,8 +79,7 @@ def user_management(request):
                     messages.error(request, "You cannot delete your own account.")
                     return redirect('user_management')
                 else:
-                    user_to_delete = Users.objects.get(userId=userId)
-                    user_to_delete.delete()
+                    Users.objects.delete_user(userId = userId)
                     messages.success(request, f"User with ID {institutionId} has been deleted successfully.")
                     return redirect('user_management')
             else:
@@ -79,6 +87,41 @@ def user_management(request):
                 return redirect('user_management')
         else:
             messages.error(request, "Institution ID and User ID are required to delete a user.")
+            return redirect('user_management')
+    
+    if request.method == 'POST' and request.POST.get('editUser'):
+        institutionId = request.POST.get('institutionId')
+        userId = request.POST.get('userId')
+        fullName = request.POST.get('fullName')
+        email = request.POST.get('email')
+        phoneNumber = request.POST.get('phoneNumber')
+        userType = request.POST.get('userType')
+        gender = request.POST.get('gender')
+
+        if institutionId and userId:
+
+            user_to_edit = Users.objects.filter(userId=userId).first()
+
+            if user_to_edit.institutionId != institutionId:
+                if Users.objects.filter(institutionId=institutionId).exists():
+                    messages.error(request, f"User with ID {institutionId} already exists.")
+                    return redirect('user_management')
+
+            try:
+                Users.objects.update_user(
+                    userId=userId,
+                    institutionId=institutionId,
+                    fullName=fullName,
+                    email=email,
+                    phoneNumber=phoneNumber,
+                    gender = gender
+                )
+                messages.success(request, f"User with ID {institutionId} has been updated successfully.")
+            except Users.DoesNotExist:
+                messages.error(request, f"User with ID {institutionId} does not exist.")
+            return redirect('user_management')
+        else:
+            messages.error(request, "Institution ID and User ID are required to update a user.")
             return redirect('user_management')
         
     return render(request, 'home/admin/user_management.html', {'page_obj': users, 'total_users': total_users, 'faculty_count': faculty_count, 'student_count': student_count, 'admin_count': admin_count})
@@ -93,6 +136,7 @@ def add_user(request):
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirmPassword')
         user_type = request.POST.get('userType')
+        gender = request.POST.get('gender')
 
         if not all([institution_id, full_name, email, password, user_type]):
             messages.error(request, "All required fields must be filled")
@@ -112,21 +156,24 @@ def add_user(request):
                 institutionId=institution_id,
                 fullName=full_name,
                 email=email,
-                password=password
+                password=password,
+                gender=gender
             )
         elif user_type == 'student':
             user = Users.objects.create_user_student(
                 institutionId=institution_id,
                 fullName=full_name,
                 email=email,
-                password=password
+                password=password,
+                gender=gender
             )
         elif user_type == 'faculty':
             user = Users.objects.create_user_faculty(
                 institutionId=institution_id,
                 fullName=full_name,
                 email=email,
-                password=password
+                password=password,
+                gender=gender
             )
 
         # Set additional properties
